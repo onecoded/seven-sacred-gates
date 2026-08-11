@@ -1,0 +1,12 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# The owner's personal reading, generated from a private vault.
+# Never leaves the machine - the app fetches it at runtime, and the
+# Sacral band is sealed at the generator.
+data/soul-bands.json
