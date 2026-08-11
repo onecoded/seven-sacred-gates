@@ -10,3 +10,10 @@ Thumbs.db
 # Never leaves the machine - the app fetches it at runtime, and the
 # Sacral band is sealed at the generator.
 data/soul-bands.json
+
+# Personal video, 1.1 GB. Cannot go in ANY GitHub repo, private included:
+# four of these files are over the hard 100 MB per-file limit (largest is
+# 345 MB) and the push is rejected outright. Other people appear in them and
+# have not been asked. Video belongs on YouTube, one consented upload at a
+# time - see YOUTUBE-UPLOAD-WORKSHEET.md.
+media/

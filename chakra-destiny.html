@@ -2429,8 +2429,14 @@ function openCommons(tab) {
 function closeCommons() { const p = document.getElementById('commons-panel'); if (p) p.style.display = 'none'; }
 
 // ── SANCTUM — the soul portal (seven bands, one per chakra) ──
+// OFF 2026-08-10 (his call): his own footage stays out of the Sanctum until it
+// has been watched and approved clip by clip. The files, the manifest and the
+// build tool are all intact -- flip this to true to bring them back, no rebuild.
+const SANCTUM_SHOW_OWN_FOOTAGE = false;
+
 let SOUL_BANDS = null;
 let BAND_MEDIA = null;   // his own chakra-sorted footage; {} if not built yet
+let BAND_QUESTIONS = null; // condition-keyed question bank; null = fall back to advancedQs
 async function _loadSoulBands() {
   if (SOUL_BANDS) return SOUL_BANDS;
   // A public deploy has no soul-bands.json -- it is generated from a private
@@ -2446,6 +2452,10 @@ async function _loadSoulBands() {
     const m = await fetch('data/band-media.json');
     BAND_MEDIA = m.ok ? await m.json() : {};
   } catch (e) { BAND_MEDIA = {}; console.warn('band-media.json not loaded:', e); }
+  try {
+    const q = await fetch('data/band-questions.json');
+    BAND_QUESTIONS = q.ok ? await q.json() : null;
+  } catch (e) { BAND_QUESTIONS = null; console.warn('band-questions.json not loaded:', e); }
   return SOUL_BANDS;
 }
 function _sanctumBandState(i) {
@@ -2477,9 +2487,44 @@ async function openSanctum() {
   p.style.display = 'flex';
   renderSanctumSpine();
 }
-function closeSanctum() { const p = document.getElementById('sanctum-panel'); if (p) p.style.display = 'none'; }
+function closeSanctum() {
+  if (typeof descentWalkStop === 'function') descentWalkStop(true);  // never leave a timer running unseen
+  const p = document.getElementById('sanctum-panel');
+  if (p) p.style.display = 'none';
+}
+
+// The whole column in one picture: every band's status and dosha at a glance,
+// plus the overall figure. Same computed state the chambers use -- deterministic
+// SVG, no GPU, no network, never stale (contract §5: studio renders are for
+// atmosphere, never for data).
+function sanctumOverview() {
+  const order = [6, 5, 4, 3, 2, 1, 0];         // crown..root, display order
+  const W = 340, ROW = 22, H = order.length * ROW + 34;
+  const PCT = { open: 100, partial: 55, blocked: 20 };
+  let rows = '', total = 0;
+  order.forEach((i, k) => {
+    const ch = CHAKRAS[i];
+    const { state, dosha } = _sanctumBandState(i);
+    const pct = PCT[state]; total += pct;
+    const y = 26 + k * ROW;
+    const barW = (pct / 100) * 150;
+    rows += `
+      <text x="0" y="${y + 9}" fill="${ch.color}" font-size="9" font-family="Chakra Petch, monospace" letter-spacing="1">${ch.name.replace(/\s*Chakra$/, '').toUpperCase()}</text>
+      <rect x="104" y="${y + 1}" width="150" height="9" rx="4.5" fill="rgba(255,255,255,.06)"/>
+      <rect x="104" y="${y + 1}" width="${barW.toFixed(1)}" height="9" rx="4.5" fill="${ch.color}" opacity="${state === 'open' ? 0.95 : state === 'partial' ? 0.6 : 0.32}"/>
+      <text x="262" y="${y + 9}" fill="#9988bb" font-size="8" font-family="Chakra Petch, monospace">${state}</text>
+      ${dosha ? `<text x="322" y="${y + 9}" fill="${ch.glow}" font-size="9" text-anchor="middle" font-family="Chakra Petch, monospace">${dosha[0].toUpperCase()}</text>` : ''}`;
+  });
+  const overall = Math.round(total / order.length);
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:340px;display:block;margin:0 auto">
+    <text x="0" y="10" fill="#7766aa" font-size="8" letter-spacing="2" font-family="Chakra Petch, monospace">THE COLUMN AT A GLANCE</text>
+    <text x="${W}" y="10" text-anchor="end" fill="#c9a84c" font-size="9" font-family="Chakra Petch, monospace">${overall}% FLOWING</text>
+    ${rows}
+  </svg>`;
+}
 
 function renderSanctumSpine() {
+  if (typeof descentWalkStop === 'function') descentWalkStop(true);  // leaving the descent ends the walk
   const order = [6, 5, 4, 3, 2, 1, 0]; // display crown..root; CHAKRAS is stored root..crown
   const yOf = (k) => 120 + k * 88;
   const W = 380, X = W / 2, H = yOf(6) + 90;
@@ -2509,7 +2554,9 @@ function renderSanctumSpine() {
       <button class="jp-leaf-btn" onclick="renderDescent()" style="max-width:340px;margin:0 auto;background:linear-gradient(135deg,rgba(20,10,50,.9),rgba(80,40,160,.9));border-color:#8855ff;font-size:.82em">
         ✦ Today's Descent — Crown to Root and Home Again
       </button>
-    </div>`;
+      ${_allAnswers().length ? `<button class="btn-sm" onclick="renderSanctumHistory()" style="margin-top:10px;border-color:#8855ff55;color:#a98fe0">📖 What you've said · ${_allAnswers().length}</button>` : ''}
+    </div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.07)">${sanctumOverview()}</div>`;
 }
 
 // ── The Descent — Crown to Root and home again, thirteen stations, daily ──
@@ -2537,6 +2584,59 @@ function descentToggle(stationIdx) {
   _put('chakra_sanctum_descent', D);
   renderDescent();
 }
+// ── Walking the descent hands-free ──────────────────────────────────────────
+// Paces the thirteen stations so it is a practice rather than a to-do list:
+// each station sounds its own tone and holds for a breath before the next.
+// Never starts on load -- the app's rule is that sound follows a user gesture.
+let _walk = null;   // {i, timer, secsLeft} while walking, else null
+const WALK_HOLD_SECS = 12;      // ~two slow breaths per station
+function descentWalkStop(silent) {
+  if (_walk && _walk.timer) clearInterval(_walk.timer);
+  _walk = null;
+  if (!silent) renderDescent();
+}
+function descentWalkStart() {
+  unlockAudio();
+  descentWalkStop(true);
+  _walk = { i: 0, secsLeft: WALK_HOLD_SECS };
+  _walkEnter(0);
+  _walk.timer = setInterval(() => {
+    if (!_walk) return;
+    _walk.secsLeft--;
+    if (_walk.secsLeft > 0) { _walkPaint(); return; }
+    const D = _descentState();                       // mark the station walked
+    if (!D.done[_walk.i]) {
+      D.done[_walk.i] = true;
+      _put('chakra_sanctum_descent', D);
+      if (DESCENT_ORDER.every((_, j) => D.done[j])) {
+        D.days = (D.days || 0) + 1; _put('chakra_sanctum_descent', D);
+        pranaAward(15, 'the descent is walked — unity to root and home again');
+        playCompletionFanfare();
+      }
+    }
+    if (_walk.i >= DESCENT_ORDER.length - 1) { descentWalkStop(); return; }
+    _walk.i++; _walk.secsLeft = WALK_HOLD_SECS; _walkEnter(_walk.i);
+  }, 1000);
+  renderDescent();
+}
+function _walkEnter(i) {
+  const ch = CHAKRAS[DESCENT_ORDER[i]];
+  playHealingTone(ch.freq, 0.22, 3.2);
+  _walkPaint();
+}
+function _walkPaint() {
+  if (!_walk) return;
+  const el = document.getElementById('walk-status');
+  if (!el) return;
+  const ch = CHAKRAS[DESCENT_ORDER[_walk.i]];
+  const half = WALK_HOLD_SECS / 2;
+  const phase = _walk.secsLeft > half ? 'breathe in' : 'breathe out';
+  el.innerHTML = `<div style="color:${ch.color};font-size:1.1em;letter-spacing:1px">${ch.name} · ${ch.freq}Hz</div>
+    <div style="color:#9988bb;font-size:.8em;font-style:italic">${phase} · ${_walk.secsLeft}s · station ${_walk.i + 1} of ${DESCENT_ORDER.length}</div>`;
+  const row = document.getElementById('descent-row-' + _walk.i);
+  if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 function renderDescent() {
   unlockAudio();
   const D = _descentState();
@@ -2547,7 +2647,8 @@ function renderDescent() {
     const ch = CHAKRAS[chIdx];
     const on = !!D.done[stationIdx];
     const leg = stationIdx < turn ? '↓ descending' : stationIdx > turn ? '↑ ascending' : '✦ the turn';
-    return `<div onclick="descentToggle(${stationIdx})" style="display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;cursor:pointer;background:${on ? ch.color + '14' : 'transparent'}">
+    const isHere = _walk && _walk.i === stationIdx;
+    return `<div id="descent-row-${stationIdx}" onclick="descentToggle(${stationIdx})" style="display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;cursor:pointer;background:${isHere ? ch.color + '2e' : on ? ch.color + '14' : 'transparent'};${isHere ? `box-shadow:0 0 0 1px ${ch.color}77` : ''}">
       <span style="width:22px;height:22px;flex:none;border-radius:50%;border:1.5px solid ${on ? ch.color : 'rgba(255,255,255,.25)'};color:${ch.color};font-size:13px;text-align:center;line-height:20px;background:${on ? ch.color + '22' : 'rgba(255,255,255,.03)'}">${on ? '✓' : ''}</span>
       <span style="width:26px;height:26px;flex:none">${chakraGlyph(ch.id)}</span>
       <span style="flex:1;font-size:.85em;color:${on ? 'rgba(255,255,255,.45)' : 'rgba(255,255,255,.85)'}">${ch.name}</span>
@@ -2560,34 +2661,103 @@ function renderDescent() {
       <div class="rainbow" style="font-size:1.5em">The Descent</div>
       <div style="color:#9988bb;font-size:.8em;font-style:italic">Unity down to the root, and back up to unity · ${doneN}/${DESCENT_ORDER.length}${D.days ? ` · ${D.days} descent${D.days > 1 ? 's' : ''} walked` : ''}</div>
     </div>
+    <div style="text-align:center;margin-bottom:12px">
+      ${_walk
+        ? `<div id="walk-status" style="min-height:42px;margin-bottom:8px"></div>
+           <button class="btn-sm" onclick="descentWalkStop()" style="border-color:#ff888855;color:#ff9999">■ stop the walk</button>`
+        : `<button class="jp-leaf-btn" onclick="descentWalkStart()" style="max-width:300px;margin:0 auto;background:linear-gradient(135deg,rgba(20,10,50,.9),rgba(80,40,160,.9));border-color:#8855ff;font-size:.8em">
+             ▶ Walk it hands-free · ${Math.round(WALK_HOLD_SECS * DESCENT_ORDER.length / 60)} min
+           </button>
+           <div style="font-size:.66em;color:#7766aa;font-style:italic;margin-top:5px">each station holds a breath and sounds its own tone</div>`}
+    </div>
     <div style="background:rgba(0,0,0,.32);border:1px solid ${doneN === DESCENT_ORDER.length ? '#88ffcc66' : 'rgba(170,102,255,.35)'};border-radius:16px;padding:12px 14px">
       ${rows}
     </div>`;
+  if (_walk) _walkPaint();
 }
 
 // ── Today's Question — pulls advancedQs + the band's own unanswered line,
 // persists per band, never repeats. Sacral never reaches this (openBand
 // returns early for sealed bands before any of this runs).
-function _questionPool(ch, band) {
-  const pool = (ch.advancedQs || []).slice();
-  if (band.unanswered) pool.push(band.unanswered);
-  return pool;
+// Questions are chosen by the STANDARDIZED CODE -- band + status + dosha -- not
+// by a fixed running order, so they answer the condition of the present. The
+// bank is deliberately general: it must land for any user carrying that code,
+// never assume one person's biography. Most specific first (band+status, then
+// dosha), falling back to the untagged advancedQs when a set is exhausted.
+function _questionCandidates(ch, state, dosha) {
+  const out = [];
+  const B = BAND_QUESTIONS;
+  if (B) {
+    const band = (B.byBand || {})[ch.id] || {};
+    (band[state] || []).forEach(q => out.push(q));
+    if (dosha) ((B.byDosha || {})[dosha[0].toUpperCase()] || []).forEach(q => out.push(q));
+  }
+  (ch.advancedQs || []).forEach(q => out.push(q));   // general fallback
+  return out.filter((q, i) => out.indexOf(q) === i); // de-dupe, keep order
 }
 function _questionState() { return _store('chakra_sanctum_questions', {}); }
-function _nextQuestionIdx(bandId, pool) {
-  const Q = _questionState();
-  const asked = (Q[bandId] && Q[bandId].asked) || [];
-  for (let i = 0; i < pool.length; i++) if (!asked.includes(i)) return i;
-  return -1;
+// Tracked by question TEXT, never by index: the pool changes size with the
+// user's condition, so an index would silently point at a different question.
+function _nextQuestion(bandId, pool) {
+  const asked = (_questionState()[bandId] || {}).asked || [];
+  return pool.find(q => !asked.includes(q)) || null;
 }
-function _questionRespond(bandId, idx, text) {
+const _currentQ = {};   // bandId -> the question on screen right now
+function _questionRespond(bandId, text) {
+  const q = _currentQ[bandId];
+  if (!q) return;
   const Q = _questionState();
   if (!Q[bandId]) Q[bandId] = { asked: [], answers: {} };
-  if (!Q[bandId].asked.includes(idx)) Q[bandId].asked.push(idx);
-  if (text && text.trim()) Q[bandId].answers[idx] = text.trim();
+  if (!Q[bandId].asked.includes(q)) Q[bandId].asked.push(q);
+  // {a, t} so history can be ordered. Older saves are bare strings -- _ansOf
+  // reads both rather than migrating, because a migration that drops an answer
+  // is worse than the gap it fixes.
+  if (text && text.trim()) Q[bandId].answers[q] = { a: text.trim(), t: new Date().toISOString() };
   _put('chakra_sanctum_questions', Q);
   if (text && text.trim()) pranaAward(3, 'a question answered — the well runs deeper');
   openBand(bandId);
+}
+function _ansOf(v) {
+  if (v == null) return null;
+  return typeof v === 'string' ? { a: v, t: null } : v;   // legacy bare string
+}
+function _bandAnswers(bandId) {
+  const rec = _questionState()[bandId];
+  if (!rec || !rec.answers) return [];
+  return Object.keys(rec.answers)
+    .map(q => ({ q, ...(_ansOf(rec.answers[q]) || {}) }))
+    .filter(x => x.a)
+    .sort((x, y) => (y.t || '').localeCompare(x.t || ''));   // newest first
+}
+function _allAnswers() {
+  const Q = _questionState();
+  return Object.keys(Q).flatMap(band => _bandAnswers(band).map(x => ({ band, ...x })))
+    .sort((x, y) => (y.t || '').localeCompare(x.t || ''));
+}
+function _fmtWhen(t) {
+  if (!t) return 'earlier';
+  const d = new Date(t), days = Math.floor((Date.now() - d) / 86400000);
+  return days === 0 ? 'today' : days === 1 ? 'yesterday'
+       : days < 30 ? days + ' days ago' : d.toLocaleDateString();
+}
+function renderSanctumHistory() {
+  const all = _allAnswers();
+  const body = document.getElementById('sanctum-body');
+  const rows = all.map(x => {
+    const ch = CHAKRAS.find(c => c.id === x.band) || { color: '#999', name: x.band };
+    return `<div style="border-left:2px solid ${ch.color};padding:8px 0 8px 12px;margin-bottom:14px">
+      <div style="font-size:.62em;letter-spacing:1.5px;color:${ch.color};text-transform:uppercase">${ch.name} · ${_fmtWhen(x.t)}</div>
+      <div style="color:#9988bb;font-style:italic;font-size:.82em;margin:3px 0">${escHtml(x.q)}</div>
+      <div style="color:#e8e0f8;font-size:.9em;line-height:1.55">${escHtml(x.a)}</div>
+    </div>`;
+  }).join('');
+  body.innerHTML = `
+    <button onclick="renderSanctumSpine()" style="background:none;border:none;color:#9988bb;cursor:pointer;margin-bottom:14px;font-size:.8em">← all seven</button>
+    <div style="text-align:center;margin-bottom:16px">
+      <div class="rainbow" style="font-size:1.5em">What You've Said</div>
+      <div style="color:#9988bb;font-size:.8em;font-style:italic">${all.length} answer${all.length === 1 ? '' : 's'} across the bands — yours alone, on this device</div>
+    </div>
+    ${all.length ? rows : `<div style="text-align:center;color:#9988bb;font-style:italic;font-size:.85em;padding:20px">Nothing yet. Answer a question in any band and it will keep it here for you.</div>`}`;
 }
 
 // ── Band infographic — SVG drawn in-app from real computed state, per §5:
@@ -2633,7 +2803,7 @@ async function openBand(id) {
       ${vid.note ? `<div class="vid-note">${escHtml(vid.note)}</div>` : ''}
     </div>` : '';
   // His own footage wins over the curated YouTube fallback when it exists.
-  const mine = (BAND_MEDIA && BAND_MEDIA[id]) || [];
+  const mine = SANCTUM_SHOW_OWN_FOOTAGE ? ((BAND_MEDIA && BAND_MEDIA[id]) || []) : [];
   const _mmss = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   const mineHtml = mine.length ? `<div class="vid-box">
       <div class="vid-title">🎬 YOUR OWN FOOTAGE · ${ch.name.toUpperCase()} · ${mine.length} clip${mine.length > 1 ? 's' : ''}</div>
@@ -2663,17 +2833,22 @@ async function openBand(id) {
     return;
   }
   const { dosha } = _sanctumBandState(i);
-  const pool = _questionPool(ch, band);
-  const qIdx = _nextQuestionIdx(id, pool);
-  const questionHtml = qIdx === -1
-    ? `<div style="margin-bottom:16px;text-align:center;color:#9988bb;font-style:italic;font-size:.85em">✦ Every question in this band has been asked. The well runs deep, not wide — the descent returns you here tomorrow.</div>`
+  const pool = _questionCandidates(ch, state, dosha);
+  const q = _nextQuestion(id, pool);
+  _currentQ[id] = q;
+  const condLabel = `${state}${dosha ? ' · ' + dosha : ''}`;
+  const questionHtml = !q
+    ? `<div style="margin-bottom:16px;text-align:center;color:#9988bb;font-style:italic;font-size:.85em">✦ Every question for this condition has been asked. The well runs deep, not wide — and the question changes when your condition does.</div>`
     : `<div style="margin-bottom:16px;border:1px solid ${ch.color}33;border-radius:10px;padding:14px">
-        <div style="font-size:.7em;letter-spacing:2px;color:${ch.color};text-transform:uppercase;margin-bottom:8px">TODAY'S QUESTION</div>
-        <div style="color:#e8e0f8;font-style:italic;margin-bottom:10px">${escHtml(pool[qIdx])}</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+          <div style="font-size:.7em;letter-spacing:2px;color:${ch.color};text-transform:uppercase">TODAY'S QUESTION</div>
+          <div style="font-size:.6em;letter-spacing:1px;color:#7766aa;text-transform:uppercase" title="Chosen for your current condition: band status${dosha ? ' and dosha' : ''}">${condLabel}</div>
+        </div>
+        <div style="color:#e8e0f8;font-style:italic;margin-bottom:10px">${escHtml(q)}</div>
         <textarea id="q-answer-${id}" rows="3" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#e8e0f8;padding:8px;font-family:inherit;font-size:.85em;box-sizing:border-box" placeholder="Answer honestly, or leave it and just sit with it..."></textarea>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn-sm" style="border-color:${ch.color}66;color:${ch.color}" onclick="_questionRespond('${id}',${qIdx},document.getElementById('q-answer-${id}').value)">Save answer</button>
-          <button class="btn-sm" style="opacity:.6" onclick="_questionRespond('${id}',${qIdx},'')">Skip for now</button>
+          <button class="btn-sm" style="border-color:${ch.color}66;color:${ch.color}" onclick="_questionRespond('${id}',document.getElementById('q-answer-${id}').value)">Save answer</button>
+          <button class="btn-sm" style="opacity:.6" onclick="_questionRespond('${id}','')">Skip for now</button>
         </div>
       </div>`;
   body.innerHTML = `
@@ -2696,6 +2871,19 @@ async function openBand(id) {
         <div style="color:#e8e0f8;line-height:1.6;font-size:.92em">${_mdLite(text)}</div>
       </div>`).join('')}
     ${questionHtml}
+    ${(() => {
+      const prev = _bandAnswers(id);
+      if (!prev.length) return '';
+      return `<details style="margin-bottom:16px;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px">
+        <summary style="cursor:pointer;font-size:.7em;letter-spacing:2px;color:${ch.color};text-transform:uppercase">WHAT YOU'VE SAID HERE · ${prev.length}</summary>
+        <div style="margin-top:10px">${prev.map(x => `
+          <div style="margin-bottom:12px">
+            <div style="font-size:.62em;color:#7766aa;letter-spacing:1px">${_fmtWhen(x.t)}</div>
+            <div style="color:#9988bb;font-style:italic;font-size:.8em;margin:2px 0">${escHtml(x.q)}</div>
+            <div style="color:#e8e0f8;font-size:.88em;line-height:1.5">${escHtml(x.a)}</div>
+          </div>`).join('')}</div>
+      </details>`;
+    })()}
     ${mineHtml}
     ${mineHtml ? '' : vidHtml}`;
 }
