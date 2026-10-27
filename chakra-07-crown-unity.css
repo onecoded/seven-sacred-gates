@@ -1,0 +1,327 @@
+/* ============================================================================
+   CHAKRA 07 (SAHASRARA · 963 Hz · 405 nm Imperial Amethyst, Orchid & White-Gold) — STYLESHEET #10: SAHASRARA 963 HZ IMPERIAL AMETHYST MASTER STYLESHEET (V8.8)
+   Purpose: Canonical Crown Chakra master stylesheet automatically applied to Seven Sacred Gates, OneTrueDAO, and One Portal | Skill Engine: Level 10 · WILD-CRAZY #10 SYNTHESIS: Brag + Hyperframes + Whisper + /tweak Sliders (#23-#25) (60fps Particle Vortex + /tweak Live Token Sliders + Brag Launch Composer + 8-Step Sequencer)
+   Vault Sacred Blueprint: 60 Petals (Visarga (Silent Breath) · All 50 Sanskrit Phonemes x 20 Layers (1000 Petals, 60 Rendered)) · Cascading Diamond Fountain (Zero-Friction Torus)
+   Closed -> Open Evolution: Rigid Golden Dome Cap -> Cascading Diamond-Amethyst Fountain
+   Governed by: evolve-design-and-css-law (v10.0 · White-Default 3-Part Minimal Law)
+   - Pure White (#FFFFFF) Primary Canvas + Deep Slate Ink (#0F172A) + ~3% Soft Jewel Accent
+   - Universal 3-Part Minimal Layout (.beam-minimal-shell: Header + Primary Stage + Collapsed Footer)
+   - Calm 1px solid hairline borders (zero loud 3px/4px side stripes, zero inline styles, zero emojis)
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&family=IBM+Plex+Mono:ital,wght@0,300;0,400;1,300&family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=zodiak@300,301,400,401,500&f[]=boska@300,301,400,401,500&f[]=satoshi@300,400,500&f[]=general-sans@300,400,500&f[]=clash-display@300,400,500&display=swap');
+
+:root,
+html,
+html[data-chakra="crown"],
+html[data-theme="light"][data-chakra="crown"] {
+  color-scheme: light;
+  --ee-canvas: #FFFFFF;
+  --ee-canvas-alt: #F8FAFC;
+  --ee-surface: #FFFFFF;
+  --ee-surface-elevated: #FFFFFF;
+  --ee-surface-hover: #FAF5FF;
+  --ee-ink: #0F172A;
+  --ee-ink-soft: #334155;
+  --ee-ink-muted: #64748B;
+  --ee-vision-blue: #A855F7;
+  --ee-vision-deep: #FAF5FF;
+  --ee-vision-sky: #C084FC;
+  --ee-copper: #C084FC;
+  --ee-copper-warm: #FBBF24;
+  --ee-heart-emerald: #059669;
+  --ee-err: #DC2626;
+  --ee-hairline: rgba(15, 23, 42, 0.08);
+  --ee-hairline-strong: rgba(15, 23, 42, 0.15);
+  --chakra-active-key: "crown";
+  --chakra-active-hz: "963 Hz";
+  --chakra-active-nm: "405 nm Imperial Amethyst, Orchid & White-Gold";
+  --chakra-active-style: "10 - Sahasrara 963 Hz Imperial Amethyst Master Stylesheet (v8.8)";
+  --chakra-skill-engine: "Level 10 · WILD-CRAZY #10 SYNTHESIS: Brag + Hyperframes + Whisper + /tweak Sliders (#23-#25)";
+  --chakra-petals: "60";
+  --chakra-rpm: "Cascading Diamond Fountain (Zero-Friction Torus)";
+  --ee-spring: 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  --ee-breath: 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  --font-display: 'Plus Jakarta Sans', 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Satoshi', 'General Sans', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+}
+
+html[data-theme="dark"][data-chakra="crown"],
+html[data-somatic="shadow"][data-chakra="crown"] {
+  color-scheme: dark;
+  --ee-canvas: #FFFFFF;
+  --ee-canvas-alt: #0E1118;
+  --ee-surface: #FAF8F5;
+  --ee-surface-elevated: #FAF8F5;
+  --ee-surface-hover: #1A202E;
+  --ee-ink: #F8FAFC;
+  --ee-ink-soft: #CBD5E1;
+  --ee-ink-muted: #94A3B8;
+  --ee-vision-blue: #C084FC;
+  --ee-vision-deep: #211336;
+  --ee-vision-sky: #E9D5FF;
+  --ee-copper: #A855F7;
+  --ee-hairline: rgba(248, 250, 252, 0.09);
+  --ee-hairline-strong: rgba(192, 132, 252, 0.38);
+}
+
+/* --- 4 Somatic Luminance States (Tastemaker & Colour-as-Medicine) --- */
+html[data-chakra="crown"][data-somatic="dissonant"] {
+  --ee-vision-blue: #64748B;
+  --ee-vision-sky: #94A3B8;
+}
+html[data-chakra="crown"][data-somatic="grounding"] {
+  --ee-vision-blue: #A855F7;
+  --ee-vision-sky: #C084FC;
+}
+html[data-chakra="crown"][data-somatic="healed"] {
+  --ee-vision-blue: #A855F7;
+  --ee-vision-sky: #C084FC;
+}
+html[data-chakra="crown"][data-somatic="transmuted"] {
+  --ee-vision-blue: #C084FC;
+  --ee-vision-sky: #FBBF24;
+}
+
+/* --- Universal 3-Part Minimal Layout Primitives (Header + Primary Stage + Quiet Footer) --- */
+.beam-minimal-shell {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 36px 24px 72px;
+  background-color: var(--ee-canvas);
+  color: var(--ee-ink);
+  font-family: var(--font-sans);
+}
+
+.beam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 18px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--ee-hairline);
+}
+
+.beam-header h1 {
+  font-family: var(--font-sans);
+  font-size: clamp(24px, 2.6vw, 30px);
+  font-weight: 700;
+  color: var(--ee-ink);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.beam-header p {
+  font-size: 14.5px;
+  color: var(--ee-ink-soft);
+  margin: 4px 0 0;
+}
+
+.beam-dropzone {
+  background: var(--ee-canvas-alt);
+  border: 2px dashed var(--ee-vision-blue);
+  border-radius: 16px;
+  padding: 40px 28px;
+  text-align: center;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+  margin-bottom: 20px;
+}
+
+.beam-dropzone:hover,
+.beam-dropzone.is-dragover {
+  background: var(--ee-vision-deep);
+  border-color: var(--ee-vision-sky);
+}
+
+.beam-footer {
+  margin-top: 44px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ee-hairline);
+  font-size: 13px;
+  color: var(--ee-ink-soft);
+}
+
+.beam-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: var(--ee-ink-muted);
+}
+
+/* --- Calm Guided Step-by-Step Walkthrough Primitives (CROWN Tuning) --- */
+.ee-chakra-crown-shell {
+  background-color: var(--ee-canvas);
+  color: var(--ee-ink);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  padding: clamp(18px, 3.5vw, 44px);
+}
+
+.ee-chakra-crown-walkthrough {
+  max-width: 820px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ee-chakra-crown-card {
+  background: var(--ee-surface-elevated);
+  border: 1px solid var(--ee-hairline);
+  border-radius: 14px;
+  padding: clamp(20px, 3vw, 28px);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  transition: border-color var(--ee-spring), transform var(--ee-spring), background-color 0.2s ease;
+}
+
+.ee-chakra-crown-card:hover {
+  border-color: var(--ee-hairline-strong);
+}
+
+.ee-chakra-crown-kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ee-vision-blue);
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.ee-chakra-crown-title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: clamp(1.65rem, 2.5vw, 2.25rem);
+  line-height: 1.12;
+  color: var(--ee-ink);
+  margin: 0 0 10px;
+}
+
+.ee-chakra-crown-lead {
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--ee-ink-soft);
+  max-width: 64ch;
+  margin: 0 0 18px;
+}
+
+.ee-chakra-crown-step-rail {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ee-chakra-crown-step-btn {
+  appearance: none;
+  background: var(--ee-canvas-alt);
+  border: 1px solid var(--ee-hairline);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--ee-ink-soft);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--ee-spring);
+}
+
+.ee-chakra-crown-step-btn.is-active,
+.ee-chakra-crown-step-btn:hover {
+  background: var(--ee-surface-elevated);
+  border-color: var(--ee-vision-blue);
+  color: var(--ee-ink);
+}
+
+.ee-chakra-crown-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.ee-chakra-crown-choice-card {
+  background: var(--ee-canvas-alt);
+  border: 1px solid var(--ee-hairline);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--ee-ink);
+  transition: border-color var(--ee-spring), background-color 0.2s ease;
+}
+
+.ee-chakra-crown-choice-card:hover,
+.ee-chakra-crown-choice-card.is-selected {
+  border-color: var(--ee-vision-blue);
+  background: var(--ee-surface-hover);
+}
+
+.ee-chakra-crown-btn-hero {
+  appearance: none;
+  background: var(--ee-vision-blue);
+  color: #FFFFFF;
+  border: 1px solid var(--ee-vision-blue);
+  border-radius: 8px;
+  padding: 11px 20px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.ee-chakra-crown-btn-hero:hover {
+  filter: brightness(1.06);
+}
+
+.ee-chakra-crown-drawer {
+  background: var(--ee-canvas-alt);
+  border: 1px solid var(--ee-hairline);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-top: 12px;
+}
+
+.ee-chakra-crown-drawer summary {
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ee-ink-soft);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+:root {
+  --ee-tweak-font-scale: 1;
+  --ee-tweak-radius: 14px;
+  --ee-tweak-pad: 22px;
+  --ee-tweak-glow: 0.06;
+  --ee-alpenglow-splash: #C084FC;
+  --ee-alpenglow-secondary: #A855F7;
+  --ee-hero-dissolve-height: 220px;
+  --ee-load-weight: 850ms;
+  --ee-reveal-distance: 26px;
+  --ee-taste-section-pad: clamp(44px, 6.5vw, 92px);
+  --ee-heading-style: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,128 @@
+{
+ "_README": "Sanctum question bank, selected by the standardized per-user code: band + status (open/partial/blocked) + dosha (V/P/K). Questions are deliberately GENERAL -- they must land for any user carrying that code, never assume one person's biography. Band-specific sets key off status; dosha sets are global because dosha is a whole-system condition, not a band condition. Falls back to CHAKRAS[].advancedQs when a condition set is exhausted.",
+
+ "byBand": {
+  "root": {
+   "blocked": [
+    "What would have to be true for you to feel safe in your own body today?",
+    "Where does your body brace when you think about money? Name the exact place.",
+    "What are you afraid would happen if you actually measured what you have?"
+   ],
+   "partial": [
+    "What is the one number you have been avoiding writing down?",
+    "Which part of your ground is solid right now, and which part is still guesswork?"
+   ],
+   "open": [
+    "What holds you steady, and have you ever thanked it out loud?",
+    "You have ground under you. What could you build on it that you have been postponing?"
+   ]
+  },
+  "sacral": {
+   "blocked": [
+    "What have you stopped letting yourself want?",
+    "Where did your pleasure go quiet, and what happened just before it did?"
+   ],
+   "partial": [
+    "What wants to be created through you that you keep deferring?",
+    "When did you last feel genuine delight, and what conditions made it possible?"
+   ],
+   "open": [
+    "What is flowing in you right now that deserves to be given room?",
+    "What does your desire know that your plans do not?"
+   ]
+  },
+  "solar": {
+   "blocked": [
+    "Where are you spending power to look right instead of to be effective?",
+    "What are you angry about that you have not let yourself say plainly?",
+    "What would you do today if you were not managing anyone's reaction to it?"
+   ],
+   "partial": [
+    "Where does your fire cook, and where does it burn?",
+    "What decision are you postponing because making it would require being disliked?"
+   ],
+   "open": [
+    "Your will is working. What is it pointed at, and did you choose that on purpose?",
+    "When did power last feel clean in your hands?"
+   ]
+  },
+  "heart": {
+   "blocked": [
+    "Who are you protecting yourself from, and what did it cost to build that wall?",
+    "What grief have you filed away as handled that is not actually handled?",
+    "What would you say to someone you love if being right did not matter?"
+   ],
+   "partial": [
+    "Where are you giving love in a form the other person cannot receive?",
+    "What do you need to hear that you have never asked anyone for?"
+   ],
+   "open": [
+    "Who has not heard from you lately who should?",
+    "What does your love make possible that you have not yet let it do?"
+   ]
+  },
+  "throat": {
+   "blocked": [
+    "What is the sentence you keep not saying, and who is it for?",
+    "Where do you go quiet to keep the peace, and what does that silence cost?",
+    "What truth would change something if you finally said it out loud?"
+   ],
+   "partial": [
+    "Where do you speak around a thing instead of into it?",
+    "What have you paid most for saying, and would you say it again?"
+   ],
+   "open": [
+    "Your voice is working. What is it time to say, and to whom?",
+    "What can you say now that you could not have said a year ago?"
+   ]
+  },
+  "thirdeye": {
+   "blocked": [
+    "What do you already know that you keep asking other people to confirm?",
+    "What would you have to put down to see clearly again?",
+    "Where are you mistaking noise for information?"
+   ],
+   "partial": [
+    "What has your intuition been repeating that you keep overruling?",
+    "When did you last act on something you could not justify, and how did it turn out?"
+   ],
+   "open": [
+    "What are you seeing right now that you have not written down?",
+    "What is becoming clear that you are not ready to say yet?"
+   ]
+  },
+  "crown": {
+   "blocked": [
+    "What did you stop trusting, and what happened right before you stopped?",
+    "If you are not talking to whatever is larger than you, when did that conversation end?",
+    "What are you doing that has meaning, and what are you doing only from momentum?"
+   ],
+   "partial": [
+    "What faith remains when everything else empties out?",
+    "What is the work actually for, underneath the reasons you give people?"
+   ],
+   "open": [
+    "What do you trust, and how do you know it is trustworthy?",
+    "What is being asked of you right now that you already know the answer to?"
+   ]
+  }
+ },
+
+ "byDosha": {
+  "V": [
+   "What in your life is changing faster than you can land on it?",
+   "Where do you need weight and regularity more than you need another option?",
+   "What did you eat today, and when did you sleep? Answer before anything strategic."
+  ],
+  "P": [
+   "Where are you pushing when the situation is asking you to cool down?",
+   "What are you trying to win that would be better resolved than won?",
+   "Where has your sharpness been useful lately, and where has it just been sharp?"
+  ],
+  "K": [
+   "What has been sitting heavy and unmoved for longer than it should have?",
+   "Where would movement help more than more thinking?",
+   "What are you holding onto out of comfort rather than value?"
+  ]
+ }
+}
